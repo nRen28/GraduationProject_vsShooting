@@ -1,4 +1,4 @@
-#include "arduino_secrets.h"
+#include "../../arduino_secrets.h"
 #include "scene_versusMode.h"
 #include "sceneManager.h"
 #include "scene_title.h"
@@ -11,6 +11,9 @@ VersusMode::VersusMode(SceneManager *p) : SceneBase(p)
     // アクセスポイントの設定
     ssid = SECRET_SSID;
     pass = SECRET_PASS;
+    // サーバーの設定
+    server = WEBSOCKET_IP;
+    port = WEBSOCKET_PORT;
 
     // WebSocketClientを動的に作成
     wsClient = new WebSocketClient(server, port);
@@ -23,7 +26,6 @@ VersusMode::VersusMode(SceneManager *p) : SceneBase(p)
     // ゲームの状態を初期化
     m_countDown = 3;
     m_timer = 0;
-
     m_gameState = STATE_WAITING_FOR_OPPONENT;
     m_p1win = false;
     m_p2win = false;

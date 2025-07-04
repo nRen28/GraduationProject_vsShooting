@@ -8,15 +8,10 @@ private:
     // --- 通信関連 ---
     char *ssid;
     char *pass;
+    char* server;
+    int port;
 
-    // WebSocketサーバー設定
-    //サーバー１
-    // const char *server = "192.168.0.13"; // サーバーのIPアドレス
-    // const int port = 8080;               // WebSocketポート
-    //サーバー2
-    const char* server = "runabook.synology.me";  // サーバーのIPアドレス
-    const int port = 18080;                 // WebSocketポート
-
+    //WebSocketClientのポインタ
     WebSocketClient *wsClient = nullptr;
 
     // WiFiの接続状態
