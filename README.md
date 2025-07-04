@@ -30,9 +30,13 @@ Arduinoに搭載されているESP32のWiFi機能を使用したリアルタイ�
 ![回路図](.\frizing_data\UntitledSketch_circuitDiagram.png)
 
 ### ソフトウェア
-まず、プロジェクトファイルをこのリポジトリからダウンロードしてください。
+まず、このリポジトリからプロジェクトファイルをダウンロードしてください。
 
-プロジェクトファイルの中にはArduinoに書き込むソースファイルためのClientフォルダがあるので、ArduinoIDEもしくはPlatformIOで開き、Arduinoに書き込んでください。
+プロジェクト内には、Arduinoに書き込むためのソースコードが含まれた Client フォルダがあります。このフォルダを Arduino IDE または PlatformIO で開いてください。
+
+その後、使用しているArduino Uno R4 WiFiに書き込むことで、ゲームがArduino上で動作するようになります。
+
+また、プロジェクト内にサーバー
 
 ### ゲームの仕様
 
