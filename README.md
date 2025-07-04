@@ -23,11 +23,11 @@ Arduinoに搭載されているESP32のWiFi機能を使用したリアルタイ�
 
 #### ブレッジボード図
 
-![ブレッジボード図](.\frizing_data\UntitledSketch_breadboard.png)
+![ブレッジボード図](./frizing_data/UntitledSketch_breadboard.png)
 
 #### 回路図
 
-![回路図](.\frizing_data\UntitledSketch_circuitDiagram.png)
+![回路図](./frizing_data/UntitledSketch_circuitDiagram.png)
 
 ### ソフトウェア構成
 
