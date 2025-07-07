@@ -1,4 +1,4 @@
-#include "../../arduino_secrets.h"
+#include "../config/arduino_secrets.h"
 #include "scene_versusMode.h"
 #include "sceneManager.h"
 #include "scene_title.h"
