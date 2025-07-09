@@ -35,7 +35,7 @@
 
 ## 概要
 
-本プロジェクトはArduino UNO R4 WiFi(以降、Arduino)で動作する**対戦型シューティングゲーム**です。  
+本プロジェクトは**Arduino UNO R4 WiFi(以降、Arduino)で動作する<ins>対戦型シューティングゲーム**</ins>です。  
 
 ### 主な特徴
 
