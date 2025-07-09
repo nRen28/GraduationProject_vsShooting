@@ -3,12 +3,15 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "soundManager.h"//ブザー
 
 #include <stdint.h>
 
+#define OLED_RESET -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define STICK_X A0
 #define STICK_Y A1
 #define BUTTON_A 8
+#define BUZZER_PIN 7
 
 #define EEPROM_ADDR_HISCORE 0
 
@@ -20,6 +23,8 @@ constexpr uint8_t MAX_OBJ = 128;
 
 //ディスプレイ
 extern Adafruit_SSD1306 display;
+//ブザー
+extern SoundManager sound;
 
 //座標
 typedef struct Point {

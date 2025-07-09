@@ -16,6 +16,11 @@ FspTimer _timer;
 volatile bool shouldDraw = false;
 volatile bool gameState = GAME_RUNNING;
 
+// OLEDのインスタンス
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+// ブザーのインスタンス
+SoundManager sound;
+
 //==============================================================================
 // セットアップ関数
 //==============================================================================
@@ -44,6 +49,10 @@ void setup()
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.clearDisplay(); // ディスプレイをクリア
 
+  // ブザーの初期化
+  sound.begin(BUZZER_PIN);
+  sound.playBeep();
+
   // ゲームの初期化
   sceneManager = new SceneManager;
   sceneManager->currentScene = new Title(sceneManager);
@@ -69,7 +78,7 @@ void loop()
   // 描画フラグが立っていたらゲームの描画を行う
   if (shouldDraw)
   {
-    display.clearDisplay();    // ディスプレイをクリア
+    display.clearDisplay(); // ディスプレイをクリア
     display.setTextColor(WHITE);
     sceneManager->drawScene(); // シーンの描画
     display.display();         // 画面を更新
