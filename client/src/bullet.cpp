@@ -10,8 +10,8 @@ Bullet::Bullet(Pos _pos, Vec _direction, int8_t _id)
     //オブジェクトID
     m_id = _id;
 
-    m_pos = _pos;
-    m_id = _id;
+    m_pos = _pos;//ここ二重になってない？
+    m_id = _id;//ここ二重になってない？
     m_direction = _direction;
 }
 
