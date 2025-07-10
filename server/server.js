@@ -4,7 +4,7 @@ const wss = new WebSocket.Server({ port: PORT });
 
 // クライアント管理
 let client1 = null;
-let client2 = null;
+let client2 = null; //確認にしやすいように名前もっと違うほうがいいかも
 
 // データ保持用
 let client1Data = { x: 96, y: 32, life: 2 };
