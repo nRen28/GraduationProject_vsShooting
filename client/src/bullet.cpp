@@ -1,5 +1,5 @@
 #include "Bullet.h"
-
+// 例えばこの下にマジックナンバーがあるとする　あるいはタイプミスを修正したとか
 Bullet::Bullet(Pos _pos, Vec _direction, int8_t _id)
 {
     //初期位置
