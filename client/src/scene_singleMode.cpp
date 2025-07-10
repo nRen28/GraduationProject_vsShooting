@@ -160,6 +160,7 @@ void SingleMode::draw()
     }
 }
 
+// ここは何の目的でおいてますか？
 SingleMode::~SingleMode()
 {
 }
