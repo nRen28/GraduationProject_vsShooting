@@ -1,16 +1,17 @@
-#include "scene_title.h"
-#include "scene_singleMode.h"
-#include "scene_versusMode.h"
+#include "SceneTitle.h"
+#include "SceneSingleMode.h"
+#include "SceneVersusMode.h"
 #include "sceneManager.h"
+#include <memory> // std::make_unique のために追加
 
 #define LOGO_DURATION 120
 
-Title::Title(SceneManager *p) : SceneBase(p)
+SceneTitle::SceneTitle(SceneManager *p) : SceneBase(p)
 {
     
 }
 
-int Title::update()
+int SceneTitle::update()
 {
     // しばらくロゴを表示
     if (m_timer < LOGO_DURATION)
@@ -30,13 +31,11 @@ int Title::update()
         {
             if (m_vsmode)
             {
-                sceneManager->deleteScene();
-                sceneManager->currentScene = new VersusMode(sceneManager); // 対戦モードに移動
+                sceneManager->m_currentScene = std::make_unique<SceneVersusMode>(sceneManager); // 対戦モードに移動
             }
             else
             {
-                sceneManager->deleteScene();
-                sceneManager->currentScene = new SingleMode(sceneManager); // シングルモードに移動
+                sceneManager->m_currentScene = std::make_unique<SceneSingleMode>(sceneManager); // シングルモードに移動
             }
         }
     }
@@ -44,7 +43,7 @@ int Title::update()
     return GAME_RUNNING;
 }
 
-void Title::draw()
+void SceneTitle::draw()
 {
     // 表示するロゴ
     if (m_timer < LOGO_DURATION)
@@ -79,6 +78,6 @@ void Title::draw()
     }
 }
 
-Title::~Title()
+SceneTitle::~SceneTitle()
 {
 }

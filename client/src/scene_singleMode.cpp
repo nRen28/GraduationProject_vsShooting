@@ -1,9 +1,10 @@
 #include "scene_singleMode.h"
 #include "sceneManager.h"
-#include "scene_title.h"
+#include "SceneTitle.h"
 #include "player.h"
 #include "enemy.h"
 #include <EEPROM.h>
+#include <memory> // std::make_unique のために追加
 
 #define COUNTDOWN_DURATION 60
 
@@ -11,8 +12,6 @@ SingleMode::SingleMode(SceneManager *p) : SceneBase(p)
 {
     // フラッシュメモリからハイスコアをロード
     m_hiscore = EEPROM.read(EEPROM_ADDR_HISCORE);
-
-    randomSeed(analogRead(0)); // エネミーのランダム移動用　0番ピンのノイズで乱数を初期化
 
     m_gameState = STATE_COUNTDOWN;
     m_countDown = 3;
@@ -24,8 +23,8 @@ SingleMode::SingleMode(SceneManager *p) : SceneBase(p)
 
 
     // プレイヤーとエネミー生成
-    m_objManager.addObj(new Player({0, SCREEN_HEIGHT / 2 - 5}, PLAYER1, &m_objManager));
-    m_objManager.addObj(new Enemy(&m_objManager));
+    m_objManager.addObj(std::make_unique<Player>(Pos{0, SCREEN_HEIGHT / 2 - 5}, PLAYER1, &m_objManager));
+    m_objManager.addObj(std::make_unique<Enemy>(&m_objManager));
 }
 
 int SingleMode::update()
@@ -69,13 +68,15 @@ int SingleMode::update()
             {
                 if (m_objManager.getObjPtr(i) != nullptr && m_objManager.getObjPtr(i)->m_id == PLAYER1)
                 {
-                    m_p1Life = ((Player *)m_objManager.getObjPtr(i))->get_life();
+                    Player* player = static_cast<Player*>(m_objManager.getObjPtr(i));
+                    m_p1Life = player->get_life();
                     m_p1death = false;
                 }
 
                 if (m_objManager.getObjPtr(i) != nullptr && m_objManager.getObjPtr(i)->m_id == ENEMY)
                 {
-                    m_score = ((Enemy *)m_objManager.getObjPtr(i))->get_hitCount();
+                    Enemy* enemy = static_cast<Enemy*>(m_objManager.getObjPtr(i));
+                    m_score = enemy->get_hitCount();
                 }
             }
         }
@@ -96,8 +97,7 @@ int SingleMode::update()
                 m_hiscore = m_score;
                 EEPROM.write(EEPROM_ADDR_HISCORE, (byte)m_hiscore);
             }
-            sceneManager->deleteScene();
-            sceneManager->currentScene = new Title(sceneManager);
+            sceneManager->m_currentScene = std::make_unique<SceneTitle>(sceneManager);
         }
         break;
     }
