@@ -2,6 +2,7 @@
 #include "SceneSingleMode.h"
 #include "SceneVersusMode.h"
 #include "sceneManager.h"
+#include <memory> // std::make_unique のために追加
 
 #define LOGO_DURATION 120
 
@@ -30,13 +31,11 @@ int SceneTitle::update()
         {
             if (m_vsmode)
             {
-                sceneManager->deleteScene();
-                sceneManager->currentScene = new SceneVersusMode(sceneManager); // 対戦モードに移動
+                sceneManager->m_currentScene = std::make_unique<SceneVersusMode>(sceneManager); // 対戦モードに移動
             }
             else
             {
-                sceneManager->deleteScene();
-                sceneManager->currentScene = new SceneSingleMode(sceneManager); // シングルモードに移動
+                sceneManager->m_currentScene = std::make_unique<SceneSingleMode>(sceneManager); // シングルモードに移動
             }
         }
     }

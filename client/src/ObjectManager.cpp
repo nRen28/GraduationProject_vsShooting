@@ -1,14 +1,15 @@
 #include "ObjectManager.h"
+#include <utility> // for std::move
 
 //オブジェクトを追加
-int ObjectManager::addObj(ObjBase* obj)
+int ObjectManager::addObj(std::unique_ptr<ObjBase> obj)
 {
     for(int i = 0; i < MAX_OBJ; i++)
     {
         //空いている場所に追加
-        if(objList[i] == nullptr)
+        if(m_objList[i] == nullptr)
         {
-            objList[i] = obj;
+            m_objList[i] = std::move(obj); // 所有権をObjectManagerに移動
             return i;//インデックスを返す
         }
     }
@@ -19,12 +20,12 @@ int ObjectManager::addObj(ObjBase* obj)
 //オブジェクトを更新
 void ObjectManager::updateObj()
 {
-    for(int i = 0; i < MAX_OBJ; i++)
+    for(auto& obj : m_objList) // 範囲ベースforループで簡潔に
     {
         //オブジェクトが存在してかつアクティブなら更新する
-        if(objList[i] != nullptr && objList[i]->m_isAlive)
+        if(obj != nullptr && obj->m_isAlive)
         {
-            objList[i]->action();
+            obj->action();
         }
     }
 }
@@ -32,12 +33,12 @@ void ObjectManager::updateObj()
 //オブジェクトを描画
 void ObjectManager::drawObj()
 {
-    for(int i = 0; i < MAX_OBJ; i++)
+    for(const auto& obj : m_objList) // 描画のみなのでconst参照
     {
         //オブジェクトが存在してかつアクティブなら描画する
-        if(objList[i] != nullptr && objList[i]->m_isAlive)
+        if(obj != nullptr && obj->m_isAlive)
         {
-            objList[i]->draw();
+            obj->draw();
         }
     }
 }
@@ -45,32 +46,23 @@ void ObjectManager::drawObj()
 //オブジェクトをクリーンアップ
 void ObjectManager::cleanupObj()
 {
-    for(int i = 0; i < MAX_OBJ; i++)
+    for(auto& obj : m_objList)
     {
         //オブジェクトが非アクティブなら削除
-        if(objList[i] != nullptr && objList[i]->m_isAlive == false)
+        if(obj != nullptr && !obj->m_isAlive)
         {
-            delete objList[i];
-            objList[i] = nullptr;
+            obj.reset(); // スマートポインタをリセットし、管理下のオブジェクトを破棄
         }
     }
 }
 
 //指定のオブジェクトのポインタを返す(nullptrに注意する)
-ObjBase* ObjectManager::getObjPtr(int8_t index)
+// 呼び出し元は所有権を持たない生のポインタを受け取る
+ObjBase* ObjectManager::getObjPtr(int8_t index) 
 {
-    return objList[index];
-}
-
-ObjectManager::~ObjectManager()
-{
-    //すべてdeleteしてメモリリークを防ぐ
-    for (int i = 0; i < MAX_OBJ; i++)
-    {
-        if (objList[i] != nullptr)
-        {
-            delete objList[i];
-            objList[i] = nullptr;
-        }
+    // 範囲外アクセスを防ぐためのチェックを追加
+    if (index >= 0 && index < MAX_OBJ) {
+        return m_objList[index].get(); // .get()で生のポインタを返す
     }
+    return nullptr;
 }

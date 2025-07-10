@@ -3,13 +3,15 @@
 #include "SceneTitle.h"  // タイトル画面 最初に呼び出すシーン
 #include "EEPROM.h"
 #include "FspTimer.h" // 割り込み処理で必要なライブラリ
+#include <memory>     // std::make_unique のために追加
 
 //==============================================================================
 // グローバル変数
 //==============================================================================
 
-// シーンマネージャーのインスタンス
-SceneManager *sceneManager = nullptr;
+ // シーンマネージャーの実体をグローバルに確保し、ポインタでアクセスする
+SceneManager g_sceneManager;
+SceneManager *sceneManager = &g_sceneManager;
 
 // タイマー割り込み関連の変数
 FspTimer _timer;
@@ -40,13 +42,15 @@ void setup()
     EEPROM.write(EEPROM_ADDR_HISCORE, 0);
   }
 
+  // 乱数生成器の初期化。未接続のアナログピンのノイズを利用する
+  randomSeed(analogRead(A0));
+
   // OLEDディスプレイの初期化
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.clearDisplay(); // ディスプレイをクリア
 
   // ゲームの初期化
-  sceneManager = new SceneManager;
-  sceneManager->currentScene = new SceneTitle(sceneManager);
+  sceneManager->m_currentScene = std::make_unique<SceneTitle>(sceneManager);
 
   // タイマー割り込みの設定
   uint8_t type;

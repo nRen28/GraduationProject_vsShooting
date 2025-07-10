@@ -1,6 +1,7 @@
 #include "player.h"
 #include "bullet.h"
 #include "GameUtils.h"
+#include <memory> // std::make_unique のために追加
 
 static constexpr int kFireRate = 50;
 static constexpr int kJoystickThresholdHigh = 800;
@@ -95,7 +96,7 @@ void Player::action()
                 cos(angle) * 0.8, // X方向の速度
                 sin(angle) * 0.8  // Y方向の速度
             };
-            m_ptr_objManager->addObj(new Bullet({m_pos.x + m_width / 2, m_pos.y + m_height / 2}, dir, bulletId));
+            m_ptr_objManager->addObj(std::make_unique<Bullet>(Pos{m_pos.x + m_width / 2, m_pos.y + m_height / 2}, dir, bulletId));
         }
 
         m_firetimer = 0;

@@ -1,8 +1,9 @@
 #include "../config/arduino_secrets.h"
 #include "scene_versusMode.h"
 #include "sceneManager.h"
-#include "scene_title.h"
+#include "SceneTitle.h"
 #include "player.h"
+#include <memory> // std::make_unique のために追加
 
 #define COUNTDOWN_DURATION 60
 
@@ -15,8 +16,8 @@ VersusMode::VersusMode(SceneManager *p) : SceneBase(p)
     server = WEBSOCKET_IP;
     port = WEBSOCKET_PORT;
 
-    // WebSocketClientを動的に作成
-    wsClient = new WebSocketClient(server, port);
+    // WebSocketClientをスマートポインタで作成
+    m_wsClient = std::make_unique<WebSocketClient>(server, port);
     status = WL_IDLE_STATUS;
 
     // 通信制御フラグを初期化
@@ -31,8 +32,8 @@ VersusMode::VersusMode(SceneManager *p) : SceneBase(p)
     m_p2win = false;
 
     // プレイヤー生成
-    objManager.addObj(new Player({0, SCREEN_HEIGHT / 2 - 5}, PLAYER1, &objManager));                 // player1
-    objManager.addObj(new Player({SCREEN_WIDTH - 10, SCREEN_HEIGHT / 2 - 5}, PLAYER2, &objManager)); // player2
+    objManager.addObj(std::make_unique<Player>(Pos{0, SCREEN_HEIGHT / 2 - 5}, PLAYER1, &objManager));                 // player1
+    objManager.addObj(std::make_unique<Player>(Pos{SCREEN_WIDTH - 10, SCREEN_HEIGHT / 2 - 5}, PLAYER2, &objManager)); // player2
 }
 
 int VersusMode::update()
@@ -87,13 +88,15 @@ int VersusMode::update()
             {
                 if (objManager.getObjPtr(i) != nullptr && objManager.getObjPtr(i)->m_id == PLAYER1)
                 {
-                    m_p1Life = ((Player *)objManager.getObjPtr(i))->get_life();
+                    Player* player1 = static_cast<Player*>(objManager.getObjPtr(i));
+                    m_p1Life = player1->get_life();
                     m_p2win = false;
                 }
 
                 if (objManager.getObjPtr(i) != nullptr && objManager.getObjPtr(i)->m_id == PLAYER2)
                 {
-                    m_p2Life = ((Player *)objManager.getObjPtr(i))->get_life();
+                    Player* player2 = static_cast<Player*>(objManager.getObjPtr(i));
+                    m_p2Life = player2->get_life();
                     m_p1win = false;
                 }
             }
@@ -102,7 +105,7 @@ int VersusMode::update()
         {
             // 結果画面へ
             m_gameState = STATE_RESULT;
-            wsClient->disconnect();
+            m_wsClient->disconnect();
         }
         break;
     // 結果画面
@@ -110,8 +113,7 @@ int VersusMode::update()
         // タイトルに戻る
         if (digitalRead(BUTTON_A) == HIGH)
         {
-            sceneManager->deleteScene();
-            sceneManager->currentScene = new Title(sceneManager);
+            sceneManager->m_currentScene = std::make_unique<SceneTitle>(sceneManager);
         }
         break;
     }
@@ -202,7 +204,7 @@ void VersusMode::communicate()
         int retryCount = 0;
         const int MAX_RETRIES = 3;
 
-        if (!wsClient->isConnected())
+        if (!m_wsClient->isConnected())
         {
             /// WiFiモジュールのチェック:
             if (WiFi.status() == WL_NO_MODULE)
@@ -256,7 +258,7 @@ void VersusMode::communicate()
                 display.print("Connecting to\n server...");
                 display.display();
                 // サーバーにつながったらループから抜ける
-                if (wsClient->connectToServer())
+                if (m_wsClient->connectToServer())
                 {
                     retryCount = 0;
                     break;
@@ -320,7 +322,8 @@ void VersusMode::sendPlayer1Data()
         if (ptr_obj != nullptr && ptr_obj->m_id == PLAYER1)
         {
             Serial.println("送信します");
-            wsClient->sendData((uint8_t)ptr_obj->m_pos.x, (uint8_t)ptr_obj->m_pos.y, ((Player *)ptr_obj)->get_life());
+            Player* player1 = static_cast<Player*>(ptr_obj);
+            m_wsClient->sendData((uint8_t)player1->m_pos.x, (uint8_t)player1->m_pos.y, player1->get_life());
             break;
         }
     }
@@ -335,7 +338,7 @@ void VersusMode::receivePlayer2Data()
         if (ptr_obj != nullptr && ptr_obj->m_id == PLAYER2)
         {
             uint8_t x, y, life;
-            bool received = wsClient->receiveData(x, y, life);
+            bool received = m_wsClient->receiveData(x, y, life);
 
             if (received)
             {
@@ -354,7 +357,8 @@ void VersusMode::receivePlayer2Data()
                     ptr_obj->m_pos.x = SCREEN_WIDTH - x - ptr_obj->m_width;
                     ptr_obj->m_pos.y = y;
                     // 残機を更新
-                    ((Player *)ptr_obj)->set_life(life);
+                    Player* player2 = static_cast<Player*>(ptr_obj);
+                    player2->set_life(life);
                 }
             }
             break;
@@ -364,6 +368,5 @@ void VersusMode::receivePlayer2Data()
 
 VersusMode::~VersusMode()
 {
-    delete wsClient;
-    wsClient = nullptr;
+    // m_wsClientはunique_ptrなので、自動的に解放される
 }
