@@ -154,7 +154,7 @@ client/
 
 ```txt
 server/
-|── .gitignore
+├── .gitignore
 ├── node_modules/
 ├── package-lock.json
 ├── package.json
