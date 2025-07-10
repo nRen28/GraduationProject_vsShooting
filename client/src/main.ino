@@ -1,6 +1,6 @@
 #include "types.h"
 #include "sceneManager.h" // シーンマネージャー
-#include "scene_title.h"  // タイトル画面 最初に呼び出すシーン
+#include "SceneTitle.h"  // タイトル画面 最初に呼び出すシーン
 #include "EEPROM.h"
 #include "FspTimer.h" // 割り込み処理で必要なライブラリ
 
@@ -13,7 +13,7 @@ SceneManager *sceneManager = nullptr;
 
 // タイマー割り込み関連の変数
 FspTimer _timer;
-volatile bool shouldDraw = false;
+volatile bool g_shouldDraw = false; // グローバル変数であることを示すプレフィックスを付与
 volatile bool gameState = GAME_RUNNING;
 
 //==============================================================================
@@ -46,7 +46,7 @@ void setup()
 
   // ゲームの初期化
   sceneManager = new SceneManager;
-  sceneManager->currentScene = new Title(sceneManager);
+  sceneManager->currentScene = new SceneTitle(sceneManager);
 
   // タイマー割り込みの設定
   uint8_t type;
@@ -67,13 +67,13 @@ void setup()
 void loop()
 {
   // 描画フラグが立っていたらゲームの描画を行う
-  if (shouldDraw)
+  if (g_shouldDraw)
   {
     display.clearDisplay();    // ディスプレイをクリア
     display.setTextColor(WHITE);
     sceneManager->drawScene(); // シーンの描画
     display.display();         // 画面を更新
-    shouldDraw = false;
+    g_shouldDraw = false;
   }
 
   // 通信処理（通信しないシーンなら何も起きない）
@@ -89,5 +89,5 @@ void callbackfunc(timer_callback_args_t *arg)
   {
     gameState = sceneManager->updateScene(); // ゲームシーンを更新
   }
-  shouldDraw = true;
+  g_shouldDraw = true;
 }

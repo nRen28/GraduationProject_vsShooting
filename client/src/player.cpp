@@ -1,8 +1,10 @@
 #include "player.h"
 #include "bullet.h"
-#include "function.h"
+#include "GameUtils.h"
 
-#define FIRERATE 50
+static constexpr int kFireRate = 50;
+static constexpr int kJoystickThresholdHigh = 800;
+static constexpr int kJoystickThresholdLow = 400;
 
 Player::Player(Pos _pos, int8_t _id, ObjManager *_ptr_objManager)
 {
@@ -37,13 +39,13 @@ void Player::action()
     if (m_id == PLAYER1)
     {
         // 移動処理
-        if (800 < analogRead(STICK_X))
+        if (kJoystickThresholdHigh < analogRead(STICK_X))
             m_vec.x = 1;
-        if (400 > analogRead(STICK_X))
+        if (kJoystickThresholdLow > analogRead(STICK_X))
             m_vec.x = -1;
-        if (800 < analogRead(STICK_Y))
+        if (kJoystickThresholdHigh < analogRead(STICK_Y))
             m_vec.y = 1;
-        if (400 > analogRead(STICK_Y))
+        if (kJoystickThresholdLow > analogRead(STICK_Y))
             m_vec.y = -1;
 
         // 正規化
@@ -57,7 +59,7 @@ void Player::action()
 
     // 弾生成
     m_firetimer++;
-    if (m_firetimer == FIRERATE)
+    if (m_firetimer >= kFireRate)
     {
         int bulletId = (m_id == PLAYER1) ? P1BULLET : P2BULLET;
 
