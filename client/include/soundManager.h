@@ -4,7 +4,7 @@
 
 enum SoundType {
   SOUND_STARTUP,//スタート音
-  SOUND_AHO,//あほ
+  SOUND_AHO,//
   SOUND_BEEP,//ビープ音
 };
 
