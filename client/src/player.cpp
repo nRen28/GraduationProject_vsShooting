@@ -96,6 +96,7 @@ void Player::action()
             m_ptr_objManager->addObj(new Bullet({m_pos.x + m_width / 2, m_pos.y + m_height / 2}, dir, bulletId));
         }
 
+        sound.playSound(SOUND_BEEP);
         m_firetimer = 0;
     }
 

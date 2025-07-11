@@ -51,7 +51,6 @@ void setup()
 
   // ブザーの初期化
   sound.begin(BUZZER_PIN);
-  sound.playBeep();
 
   // ゲームの初期化
   sceneManager = new SceneManager;
@@ -84,6 +83,8 @@ void loop()
     display.display();         // 画面を更新
     shouldDraw = false;
   }
+  //サウンド更新処理
+  sound.update();
 
   // 通信処理（通信しないシーンなら何も起きない）
   sceneManager->communicateScene();

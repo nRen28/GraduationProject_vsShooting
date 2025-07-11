@@ -2,7 +2,19 @@
 #include <Arduino.h>
 #include "pitches.h"
 
+enum SoundType {
+  SOUND_STARTUP,//スタート音
+  SOUND_AHO,//あほ
+  SOUND_BEEP,//ビープ音
+};
+
 class SoundManager {
+public:
+  SoundManager();
+  void begin(int pin);
+  void playSound(SoundType type);
+  void update();  // メロディ再生中に呼び出す必要あり
+
 private:
   int buzzerPin;
   int* currentMelody;
@@ -11,21 +23,6 @@ private:
   int currentNote;
   unsigned long noteStartTime;
   unsigned long noteDuration;
-  bool isPlaying;
-  
-public:
-  SoundManager();
-  SoundManager(int pin);
-  void begin(int pin);
-  void update();
-  void playMelody(int* melody, int* durations, int length);
-  void playTone(int frequency, int duration);
-  void stop();
-  bool isPlayingSound();
-  
-  // プリセットメロディー
-  void playStartupSound();
-  void playSuccessSound();
-  void playErrorSound();
-  void playBeep();
+
+  void setMelody(SoundType type);
 };

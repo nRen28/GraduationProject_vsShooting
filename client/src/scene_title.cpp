@@ -7,7 +7,7 @@
 
 Title::Title(SceneManager *p) : SceneBase(p)
 {
-    
+    sound.playSound(SOUND_STARTUP);
 }
 
 int Title::update()
