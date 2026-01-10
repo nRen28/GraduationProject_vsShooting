@@ -7,6 +7,7 @@
 Enemy::Enemy(ObjManager *_ptr_objManager)
 {
     // 初期位置
+    // マジックナンバー
     m_pos.x = SCREEN_WIDTH - 30;
     m_pos.y = SCREEN_HEIGHT / 2;
     // サイズ
@@ -63,6 +64,8 @@ void Enemy::action()
 
     // 時間経過で発射する弾の数UP
     m_powerUpTimer++;
+    // ==600 ではなく >=600 の方が安定すると思われる
+    // マジックナンバー　600と15
     if (m_powerUpTimer == 600 && m_bulletCount < 15)
     {
         m_bulletCount++;

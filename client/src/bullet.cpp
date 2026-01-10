@@ -23,6 +23,7 @@ void Bullet::action()
 
     //一定時間後に消滅
     m_createdTime++;
+    // マジックナンバー　600
     if(m_createdTime >600)
     {
         m_isAlive = false;
