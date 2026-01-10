@@ -1,5 +1,5 @@
 #include "Bullet.h"
-
+// プルリクエストテスト
 Bullet::Bullet(Pos _pos, Vec _direction, int8_t _id)
 {
     //初期位置
