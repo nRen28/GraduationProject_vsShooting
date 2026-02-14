@@ -1,5 +1,16 @@
 #include "WebSocketClient.h"
 
+// WebSocket Opcodes and constants for improved readability
+const uint8_t OPCODE_BINARY = 0x02;
+const uint8_t OPCODE_TEXT = 0x01;
+const uint8_t OPCODE_PING = 0x09;
+const uint8_t OPCODE_PONG = 0x0A;
+const uint8_t OPCODE_CONNECTION_CLOSE = 0x08;
+
+const uint8_t FRAME_FLAG_FIN = 0x80;
+const uint8_t FRAME_FLAG_MASK = 0x80;
+const unsigned long HANDSHAKE_TIMEOUT_MS = 5000; // 5 seconds timeout for handshake
+
 // サーバーアドレスやポートなどを初期化
 WebSocketClient::WebSocketClient(const char *serverAddr, uint16_t serverPort)
     : server(serverAddr), port(serverPort), connected(false), websocketKey("dGhlIHNhbXBsZSBub25jZQ==") {}
@@ -32,32 +43,34 @@ bool WebSocketClient::connectToServer()
         client.println("Sec-WebSocket-Version: 13");
         client.println();
 
-        // ハンドシェイクレスポンスを待機
-        delay(2000);
-
-        // レスポンスを読み込み
-        while (client.available())
+        // ハンドシェイクレスポンスをタイムアウト付きで待機
+        unsigned long startTime = millis();
+        bool handshakeComplete = false;
+        while (millis() - startTime < HANDSHAKE_TIMEOUT_MS)
         {
-            // 改行が来るまで一文字ずつ読み取る
-            String line = client.readStringUntil('\n');
-            // シリアルモニターに出力
-            Serial.println(line);
-            if (line == "\r")
+            if (client.available())
             {
-                break;
+                // HTTPレスポンスのヘッダーの終わり（空行）を探す
+                String line = client.readStringUntil('\n');
+                Serial.println(line);
+                if (line == "\r")
+                {
+                    handshakeComplete = true;
+                    break;
+                }
             }
         }
 
-        Serial.println("サーバーへの接続が確立されました");
-        connected = true;
-        return true;
+        if (handshakeComplete) {
+            Serial.println("サーバーへの接続が確立されました");
+            connected = true;
+            return true;
+        }
     }
-    else
-    {
-        Serial.println("サーバーへの接続に失敗しました");
-        connected = false;
-        return false;
-    }
+
+    Serial.println("サーバーへの接続に失敗しました");
+    disconnect(); // 接続失敗時は切断処理を呼ぶ
+    return false;
 }
 
 // 通信を切断
@@ -86,12 +99,17 @@ void WebSocketClient::sendData(uint8_t x, uint8_t y, uint8_t life)
 
     int payloadLength = 3;
 
-    // WebSocketバイナリフレーム（opcode = 0x82）
-    client.write(0x82);                 // FIN=1, opcode=0x2 (binary frame)
-    client.write(0x80 | payloadLength); // MASK=1, payload length (3バイト)
+    // WebSocketバイナリフレーム
+    client.write(FRAME_FLAG_FIN | OPCODE_BINARY);  // FIN=1, opcode=0x2 (binary frame)
+    client.write(FRAME_FLAG_MASK | payloadLength); // MASK=1, payload length (3バイト)
 
-    // マスクキー（4バイト）
-    byte maskKey[4] = {0x12, 0x34, 0x56, 0x78};
+    // [改善] RFC 6455では、クライアントからサーバーへの各フレームで新しいランダムなマスクキーを使用する必要があります。
+    byte maskKey[4];
+    // `randomSeed()`が事前に呼ばれていることを想定
+    maskKey[0] = random(0, 256);
+    maskKey[1] = random(0, 256);
+    maskKey[2] = random(0, 256);
+    maskKey[3] = random(0, 256);
     client.write(maskKey, 4);
 
     // ペイロードをマスクして送信
@@ -124,7 +142,8 @@ bool WebSocketClient::receiveData(uint8_t &x, uint8_t &y, uint8_t &life)
         // フレームタイプを確認
         opcode = firstByte & 0x0F;
 
-        if (opcode == 0x02)
+        // NOTE: この実装は125バイト以下のペイロード長にのみ対応しています。
+        if (opcode == OPCODE_BINARY)
         { // バイナリフレーム
             payloadLength = secondByte & 0x7F;
 
